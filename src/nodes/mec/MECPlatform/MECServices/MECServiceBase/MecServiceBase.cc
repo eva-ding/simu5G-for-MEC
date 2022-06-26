@@ -74,6 +74,7 @@ void MecServiceBase::initialize(int stage)
 
         requestQueueSizeSignal_ = registerSignal("requestQueueSize");
         responseTimeSignal_ = registerSignal("responseTime");
+        EV << responseTimeSignal_<<endl;
 
         binder_ = getBinder();
         meHost_ = getParentModule() // MECPlatform
@@ -297,7 +298,8 @@ bool MecServiceBase::manageRequest()
             handleRequest(socket);
             simtime_t responseTime = simTime() - currentRequestMessageServed_->getArrivalTime();
             EV_INFO <<" MecServiceBase::manageRequest - Response time - " << responseTime << endl;
-            emit(responseTimeSignal_, responseTime);
+            EV_INFO << responseTimeSignal_<<endl;
+            //emit(responseTimeSignal_, responseTime);
         }
 
         if(currentRequestMessageServed_ != nullptr)
