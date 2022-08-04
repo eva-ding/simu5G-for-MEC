@@ -79,6 +79,7 @@ class  MecAppBase : public omnetpp::cSimpleModule, public inet::TcpSocket::ICall
     omnetpp::cMessage* processedServiceResponse;
     omnetpp::cMessage* processedMp1Response;
     omnetpp::cMessage* processedUERequest;
+    omnetpp::cMessage* processedHostRequest;
     inet::Packet* pac;
 
 protected:

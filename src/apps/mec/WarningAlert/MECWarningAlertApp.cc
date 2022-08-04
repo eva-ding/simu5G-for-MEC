@@ -61,11 +61,14 @@ void MECWarningAlertApp::initialize(int stage)
 
     // set Udp Socket
     ueSocket.setOutputGate(gate("socketOut"));
-
     localUePort = par("localUePort");
     ueSocket.bind(localUePort);
 
-    processedUERequest = new cMessage("processedUERequest");
+    hostSocket.setOutputGate(gate("socketOut"));
+    //localhostPort = par("localHostPort");
+    hostSocket.bind(4002);
+
+    processedHostRequest = new cMessage("processedHostRequest");
 
     //testing
     EV << "MECWarningAlertApp::initialize - Mec application "<< getClassName() << " with mecAppId["<< mecAppId << "] has started!" << endl;
@@ -83,24 +86,45 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
     {
         if(ueSocket.belongsToSocket(msg))
         {
-            if (getParentModule()->getName() == "mecHost1"){
-                //TODO
-            }
+            //TODO cut packet and send to worker
+            sendSubMatrix(msg);
+            // if (getParentModule()->getName() == "mecHost1"){
+            //     //TODO
+            // }
+            // auto pk = check_and_cast<Packet *>(msg);
+            // auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
+            // int numOfPara = 1024;//8*matrixPk->getByteArraySize();
+            // double time = vim->calculateProcessingTime(mecAppId, 10*numOfPara/1000000);//todo how to measure time
+            // pac = check_and_cast<Packet *>(msg)->dup();
+            // scheduleAt(simTime()+time,processedUERequest);
+            // //handleUeMessage(msg);
+            // delete msg;
+            // return;
+        }
+        else
+        {
+            //TODO from host 
+            if (strcmp(msg->getName(), "SubMatrix") == 0){
             auto pk = check_and_cast<Packet *>(msg);
             auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
             int numOfPara = 1024;//8*matrixPk->getByteArraySize();
             double time = vim->calculateProcessingTime(mecAppId, 10*numOfPara/1000000);//todo how to measure time
             pac = check_and_cast<Packet *>(msg)->dup();
-            scheduleAt(simTime()+time,processedUERequest);
+            scheduleAt(simTime()+time,processedHostRequest);
             //handleUeMessage(msg);
             delete msg;
             return;
+            }
+            if (strcmp(msg->getName(), "SubResult") == 0){
+                //collect();
+            }
+
         }
     }
 //    EV<<msg->getName()<<endl;
-    if(strcmp(msg->getName(), "processedUERequest") == 0)
+    if(strcmp(msg->getName(), "processedHostRequest") == 0)
     {
-        handleUeMessage(pac);
+        handleMasterMessage(pac);
     }
 
     else return;
@@ -115,6 +139,82 @@ void MECWarningAlertApp::finish(){
     if(gate("socketOut")->isConnected()){
 
     }
+}
+
+void MECWarningAlertApp::sendSubMatrix(omnetpp::cMessage *msg){
+    auto pk = check_and_cast<Packet *>(msg);
+    ueAppAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
+    ueAppPort = pk->getTag<L4PortInd>()->getSrcPort();
+
+    auto submatrix = inet::makeShared<BytesChunk>();
+    submatrix->setBytes({1,2});
+    //matrix->setType("MatrixadataArrive");
+    //matrix->setX(20);
+    //matrix->setY(2000);
+    //matrix->setChunkLength(inet::B(2+sizeof(int)+sizeof(int)+1));
+    auto nouse = inet::makeShared<Matrix>();
+    nouse->setChunkLength(inet::B(1024));
+
+    inet::Packet* packet1 = new inet::Packet("SubMatrix");
+    inet::Packet* packet2 = new inet::Packet("SubMatrix");
+    inet::Packet* packet3 = new inet::Packet("SubMatrix");
+    packet1->insertAtBack(submatrix);
+    packet1->insertAtBack(nouse);
+    packet2->insertAtBack(submatrix);
+    packet2->insertAtBack(nouse);
+    packet3->insertAtBack(submatrix);
+    packet3->insertAtBack(nouse);
+    hostSocket.sendTo(packet1, L3AddressResolver().resolve("192.168.4.2"),4002);
+    hostSocket.sendTo(packet2, L3AddressResolver().resolve("192.168.5.2"),4002);
+    hostSocket.sendTo(packet3, L3AddressResolver().resolve("192.168.6.2"),4002);
+
+    EV << "UEWarningAlertApp::sendSubMatrix() - sent submatrix to the worker MEC app" << endl;
+}
+
+bool MECWarningAlertApp::collect(omnetpp::cMessage *msg){
+    //TODO if the data is enough,send Result;
+    //sendResultToUe();
+}
+
+void MECWarningAlertApp::sendResultToUe(){
+    EV << "MECWarningAlertApp::sendResultToUe - send total result" << endl;
+
+    auto info = inet::makeShared<BytesChunk>();
+    info->setBytes({1,2,3,4,5,6,7,8,9});
+    info->addTagIfAbsent<inet::CreationTimeTag>()->setCreationTime(simTime());
+
+    inet::Packet* packet = new inet::Packet("Matrix Result");
+    packet->insertAtBack(info);
+    ueSocket.sendTo(packet, ueAppAddress, ueAppPort);
+
+}
+
+void MECWarningAlertApp::handleMasterMessage(omnetpp::cMessage *msg){
+    auto pk = check_and_cast<Packet *>(msg);
+    masterAppAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
+    masterAppPort = pk->getTag<L4PortInd>()->getSrcPort();
+
+    EV << "MECWarningAlertApp::handleMasterMessage - sub matrix data arrived" << endl;
+
+    auto submatrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
+    if(submatrixPk == nullptr)
+        throw cRuntimeError("MECWarningAlertApp::handleUeMessage - matrix data is null");
+
+    int ans = 0;
+    for(int i = 0; i<submatrixPk->getByteArraySize(); i++){
+        ans += 2 * submatrixPk->getByte(i);
+    }
+
+    auto info = inet::makeShared<Result>();
+    info->setType("submatrix result");
+    info->setChunkLength(inet::B(sqrt(1024)));
+    info->addTagIfAbsent<inet::CreationTimeTag>()->setCreationTime(simTime());
+    info->setRes(ans);
+
+    inet::Packet* packet = new inet::Packet("SubResult");
+    packet->insertAtBack(info);
+    hostSocket.sendTo(packet, masterAppAddress, masterAppPort);
+    
 }
 
 void MECWarningAlertApp::handleUeMessage(omnetpp::cMessage *msg)

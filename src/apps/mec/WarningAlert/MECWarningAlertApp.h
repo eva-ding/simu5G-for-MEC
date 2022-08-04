@@ -56,8 +56,14 @@ class MECWarningAlertApp : public MecAppBase
     inet::UdpSocket ueSocket;
     int localUePort;
 
+    inet::UdpSocket hostSocket;
+    int localhostPort;
+
     inet::L3Address ueAppAddress;
     int ueAppPort;
+
+    inet::L3Address masterAppAddress;
+    int masterAppPort;
 
 
     int size_;
@@ -95,6 +101,11 @@ class MECWarningAlertApp : public MecAppBase
 
 //        /* TCPSocket::CallbackInterface callback methods */
        virtual void established(int connId) override;
+
+       void handleMasterMessage(omnetpp::cMessage *msg);
+       void sendSubMatrix(omnetpp::cMessage *msg);
+       bool collect(omnetpp::cMessage *msg);
+       void sendResultToUe();
 
     public:
        MECWarningAlertApp();
