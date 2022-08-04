@@ -193,6 +193,7 @@ void MecOrchestrator::startMECApp(UALCMPMessage* msg)
         newMecApp.mecHost = bestHost;
         newMecApp.ueAddress = inet::L3AddressResolver().resolve(contAppMsg->getUeIpAddress());
         newMecApp.vim = bestHost->getSubmodule("vim");
+        EV<< newMecApp.vim<<endl;
         newMecApp.mecpm = bestHost->getSubmodule("mecPlatformManager");
 
         newMecApp.mecAppName = desc.getAppName().c_str();
@@ -228,6 +229,25 @@ void MecOrchestrator::startMECApp(UALCMPMessage* msg)
          }
          else
          {
+             if (mecHosts.size() != 1){
+             auto cAM1 = createAppMsg->dup();
+             auto cAM2 = createAppMsg->dup();
+             auto cAM3 = createAppMsg->dup();
+             auto info2 = check_and_cast<MecPlatformManager*>(mecHosts[1]->getSubmodule("mecPlatformManager"))->instantiateMEApp(cAM1);
+             auto info3 = check_and_cast<MecPlatformManager*>(mecHosts[2]->getSubmodule("mecPlatformManager"))->instantiateMEApp(cAM2);
+             auto info4 = check_and_cast<MecPlatformManager*>(mecHosts[3]->getSubmodule("mecPlatformManager"))->instantiateMEApp(cAM3);
+             ip1 = info2.endPoint.addr;
+             port1 = info2.endPoint.port;
+             ip2 = info3.endPoint.addr;
+             port2 = info3.endPoint.port;
+             ip3 = info4.endPoint.addr;
+             port3 = info4.endPoint.port;
+             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost2" << " at "<< ip1.str() << ":" << port1 << endl;
+             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost3" << " at "<< ip2.str() << ":" << port2 << endl;
+             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost4" << " at "<< ip3.str() << ":" << port3 << endl;
+
+             }
+
              appInfo = mecpm->instantiateMEApp(createAppMsg);
              newMecApp.isEmulated = false;
          }
@@ -437,7 +457,7 @@ void MecOrchestrator::getConnectedMecHosts()
     if(this->hasPar("mecHostList") && strcmp(par("mecHostList").stringValue(), "")){
         EV <<"MecOrchestrator::getConnectedMecHosts - mecHostList: "<< par("mecHostList").stringValue() << endl;
         char* token = strtok ( (char*) par("mecHostList").stringValue(), ", ");            // split by commas
-
+        EV << token<<"dddyyyhhh"<<endl;
         while (token != NULL)
         {
             EV <<"MecOrchestrator::getConnectedMecHosts - mec host (from par): "<< token << endl;

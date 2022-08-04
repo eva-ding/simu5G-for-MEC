@@ -69,6 +69,11 @@ class MECWarningAlertApp : public MecAppBase
     double centerPositionY;
     double radius;
 
+    int x;
+    int y;
+
+    //cMessage *message;
+
     protected:
         virtual int numInitStages() const override { return inet::NUM_INIT_STAGES; }
         virtual void initialize(int stage) override;
@@ -81,9 +86,9 @@ class MECWarningAlertApp : public MecAppBase
 
         virtual void handleUeMessage(omnetpp::cMessage *msg) override;
 
-        virtual void modifySubscription();
-        virtual void sendSubscription();
-        virtual void sendDeleteSubscription();
+        //virtual void modifySubscription();
+        //virtual void sendSubscription();
+        //virtual void sendDeleteSubscription();
 
         virtual void handleSelfMessage(cMessage *msg) override;
 

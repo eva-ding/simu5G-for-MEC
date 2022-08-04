@@ -78,7 +78,8 @@ class  MecAppBase : public omnetpp::cSimpleModule, public inet::TcpSocket::ICall
 
     omnetpp::cMessage* processedServiceResponse;
     omnetpp::cMessage* processedMp1Response;
-
+    omnetpp::cMessage* processedUERequest;
+    inet::Packet* pac;
 
 protected:
     virtual void initialize(int stage) override;

@@ -91,6 +91,13 @@ class MecOrchestrator : public cSimpleModule
     double instantiationTime;
     double terminationTime;
 
+    inet::L3Address ip1;
+    inet::L3Address ip2;
+    inet::L3Address ip3;
+    int port1;
+    int port2;
+    int port3;
+    
     public:
         MecOrchestrator();
         const ApplicationDescriptor* getApplicationDescriptorByAppName(std::string& appName) const;

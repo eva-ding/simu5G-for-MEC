@@ -242,6 +242,7 @@ void LteMacUe::initialize(int stage)
         ttiTick_->setSchedulingPriority(1);                                              // TTI TICK after other messages
         ttiPeriod_ = binder_->getSlotDurationFromNumerologyIndex(binder_->getUeMaxNumerologyIndex(nodeId_));
         scheduleAt(NOW + ttiPeriod_, ttiTick_);
+        //scheduleAt(NOW + 10*ttiPeriod_, ttiTick_);
 
         const std::set<NumerologyIndex>* numerologyIndexSet = binder_->getUeNumerologyIndex(nodeId_);
         if (numerologyIndexSet != NULL)

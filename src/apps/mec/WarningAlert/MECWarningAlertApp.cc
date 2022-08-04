@@ -65,12 +65,14 @@ void MECWarningAlertApp::initialize(int stage)
     localUePort = par("localUePort");
     ueSocket.bind(localUePort);
 
+    processedUERequest = new cMessage("processedUERequest");
+
     //testing
     EV << "MECWarningAlertApp::initialize - Mec application "<< getClassName() << " with mecAppId["<< mecAppId << "] has started!" << endl;
 
     // connect with the service registry
-    cMessage *msg = new cMessage("connectMp1");
-    scheduleAt(simTime() + 0, msg);
+    //cMessage *msg = new cMessage("connectMp1");
+    //scheduleAt(simTime() + 0, msg);
 
 }
 
@@ -81,12 +83,28 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
     {
         if(ueSocket.belongsToSocket(msg))
         {
-            handleUeMessage(msg);
+            if (getParentModule()->getName() == "mecHost1"){
+                //TODO
+            }
+            auto pk = check_and_cast<Packet *>(msg);
+            auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
+            int numOfPara = 1024;//8*matrixPk->getByteArraySize();
+            double time = vim->calculateProcessingTime(mecAppId, 10*numOfPara/1000000);//todo how to measure time
+            pac = check_and_cast<Packet *>(msg)->dup();
+            scheduleAt(simTime()+time,processedUERequest);
+            //handleUeMessage(msg);
             delete msg;
             return;
         }
     }
-    MecAppBase::handleMessage(msg);
+//    EV<<msg->getName()<<endl;
+    if(strcmp(msg->getName(), "processedUERequest") == 0)
+    {
+        handleUeMessage(pac);
+    }
+
+    else return;
+    //MecAppBase::handleMessage(msg);
 
 }
 
@@ -102,17 +120,65 @@ void MECWarningAlertApp::finish(){
 void MECWarningAlertApp::handleUeMessage(omnetpp::cMessage *msg)
 {
     // determine its source address/port
+    //EV<<"just test"<<endl;
     auto pk = check_and_cast<Packet *>(msg);
     ueAppAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
     ueAppPort = pk->getTag<L4PortInd>()->getSrcPort();
+    //EV<< pk->peekAll() << "Packettest" <<endl; sequence chunk
+    //EV<< pk->str()<< "Packettest"<< endl;
+    //EV<< pk->getNumTags()<< "Packettest"<< endl;
+    //for(int i = 0;i<pk->getNumTags();i++){
+    //    EV<<pk->getTag(i)<<"---test"<<endl;
+    //}
 
-    auto mecPk = pk->peekAtFront<WarningAppPacket>();
+    //auto mecPk = pk->peekAtFront<WarningAppPacket>();
+    //auto mecPk = pk->peekAtFront<BytesChunk>();
 
-    if(strcmp(mecPk->getType(), START_WARNING) == 0)
+
+    //if(strcmp(mecPk->getType(), "MatrixadataArrive") == 0)
+    //{
+        EV << "MECWarningAlertApp::handleUeMessage - matrix data arrived" << endl;
+        //auto matrixPk = dynamicPtrCast<const Matrix>(mecPk);
+        auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
+        if(matrixPk == nullptr)
+            throw cRuntimeError("MECWarningAlertApp::handleUeMessage - matrix data is null");
+        //double time = vim->calculateProcessingTime(mecAppId, 150);
+        //x = matrixPk->getX();
+        //y = matrixPk->getY();
+        int ans = 0;
+        for(int i = 0; i<matrixPk->getByteArraySize(); i++){
+            ans += 2 * matrixPk->getByte(i);
+        }
+
+        //int ans = x * y;
+
+        auto info = inet::makeShared<Result>();
+        info->setType("matrix result");
+        info->setChunkLength(inet::B(sqrt(1024*5)));
+        info->addTagIfAbsent<inet::CreationTimeTag>()->setCreationTime(simTime());
+        info->setRes(ans);
+        //EV<< info->str()<< endl;
+        inet::Packet* packet = new inet::Packet("Matrix Result");
+        packet->insertAtBack(info);
+        ueSocket.sendTo(packet, ueAppAddress, ueAppPort);
+        // ueSocket.sendTo(test,L3AddressResolver().resolve("192.168.4.2"),4001);
+
+//        auto info = inet::makeShared<Result>();
+//        info->addTagIfAbsent<inet::CreationTimeTag>()->setCreationTime(simTime());
+//        info->setType("matrix result");
+//        info->setRes(ans);
+//        inet::Packet* packet = new inet::Packet("Result");
+//        packet->insertAtBack(info);
+//        EV << info;
+//        EV << packet;
+//        ueSocket.sendTo(packet, ueAppAddress, ueAppPort);
+    //}
+
+    /*if(strcmp(mecPk->getType(), START_WARNING) == 0)
     {
         /*
          * Read center and radius from message
-         */
+
         EV << "MECWarningAlertApp::handleUeMessage - WarningStartPacket arrived" << endl;
         auto warnPk = dynamicPtrCast<const WarningStartPacket>(mecPk);
         if(warnPk == nullptr)
@@ -145,9 +211,10 @@ void MECWarningAlertApp::handleUeMessage(omnetpp::cMessage *msg)
     {
         throw cRuntimeError("MECWarningAlertApp::handleUeMessage - packet not recognized");
     }
+    */
 }
 
-void MECWarningAlertApp::modifySubscription()
+/*void MECWarningAlertApp::modifySubscription()
 {
     std::string body = "{  \"circleNotificationSubscription\": {"
                        "\"callbackReference\" : {"
@@ -209,6 +276,7 @@ void MECWarningAlertApp::sendDeleteSubscription()
     std::string host = serviceSocket_.getRemoteAddress().str()+":"+std::to_string(serviceSocket_.getRemotePort());
     Http::sendDeleteRequest(&serviceSocket_, host.c_str(), uri.c_str());
 }
+*/
 
 void MECWarningAlertApp::established(int connId)
 {
@@ -233,7 +301,7 @@ void MECWarningAlertApp::established(int connId)
         inet::Packet* packet = new inet::Packet("WarningAlertPacketInfo");
         packet->insertAtBack(ack);
         ueSocket.sendTo(packet, ueAppAddress, ueAppPort);
-        sendSubscription();
+        //sendSubscription();
         return;
     }
     else
@@ -325,7 +393,7 @@ void MECWarningAlertApp::handleServiceMessage()
                     }
 
                     // send subscription for leaving..
-                    modifySubscription();
+                    //modifySubscription();
 
                 }
                 else if (criteria == "Leaving")
@@ -342,7 +410,7 @@ void MECWarningAlertApp::handleServiceMessage()
                             myfile.close();
                         }
                     }
-                    sendDeleteSubscription();
+                    //sendDeleteSubscription();
                 }
 
                 alert->setPositionX(jsonBody["subscriptionNotification"]["terminalLocationList"]["currentLocation"]["x"]);

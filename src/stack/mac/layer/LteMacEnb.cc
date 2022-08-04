@@ -332,6 +332,7 @@ void LteMacEnb::initialize(int stage)
         ttiTick_->setSchedulingPriority(1);                                              // TTI TICK after other messages
         ttiPeriod_ = binder_->getSlotDurationFromNumerologyIndex(cellInfo_->getMaxNumerologyIndex());
         scheduleAt(NOW + ttiPeriod_, ttiTick_);
+        //scheduleAt(NOW + 10*ttiPeriod_, ttiTick_);
 
         const CarrierInfoMap* carriers = cellInfo_->getCarrierInfoMap();
         CarrierInfoMap::const_iterator it = carriers->begin();

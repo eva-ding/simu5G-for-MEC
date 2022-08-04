@@ -465,6 +465,7 @@ void LteMacBase::handleMessage(cMessage* msg)
     {
         handleSelfMessage();
         scheduleAt(NOW + ttiPeriod_, ttiTick_);
+        //scheduleAt(NOW + 10*ttiPeriod_, ttiTick_);
         return;
     }
 

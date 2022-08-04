@@ -42,4 +42,14 @@ class WarningStopPacket extends WarningAppPacket
 
 }
 
+class Matrix extends WarningAppPacket
+{
+    int x;
+    int y;
+}
+
+class Result extends WarningAppPacket
+{
+    int res;
+}
 

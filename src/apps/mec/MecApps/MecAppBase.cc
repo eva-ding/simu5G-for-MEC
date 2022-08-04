@@ -119,6 +119,7 @@ void MecAppBase::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
     {
         EV << "MecAppBase::handleMessage" << endl;
+        EV<< msg->getName()<<endl;
         if(strcmp(msg->getName(), "processedServiceResponse") == 0)
         {
             handleServiceMessage();
@@ -130,6 +131,7 @@ void MecAppBase::handleMessage(cMessage *msg)
         }
         else if (strcmp(msg->getName(), "processedMp1Response") == 0)
         {
+            EV<<"here???"<<endl;
             handleMp1Message();
             if(mp1HttpMessage != nullptr)
             {
@@ -137,6 +139,15 @@ void MecAppBase::handleMessage(cMessage *msg)
                 mp1HttpMessage = nullptr;
             }
         }
+//        else if (strcmp(msg->getName(), "processdUERequest") == 0){
+//            EV<<"here?????"<<endl;
+//            handleUeMessage(message);
+//            if(mp1HttpMessage != nullptr)
+//            {
+//                delete message;
+//                message = nullptr;
+//            }
+//        }
         else
         {
             handleSelfMessage(msg);

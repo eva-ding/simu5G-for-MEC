@@ -73,14 +73,14 @@ void UEWarningAlertApp::initialize(int stage)
     ue = this->getParentModule();
 
     //retrieving mobility module
-    cModule *temp = getParentModule()->getSubmodule("mobility");
-    if(temp != NULL){
-        mobility = check_and_cast<inet::IMobility*>(temp);
-    }
-    else {
-        EV << "UEWarningAlertApp::initialize - \tWARNING: Mobility module NOT FOUND!" << endl;
-        throw cRuntimeError("UEWarningAlertApp::initialize - \tWARNING: Mobility module NOT FOUND!");
-    }
+    //cModule *temp = getParentModule()->getSubmodule("mobility");
+    //if(temp != NULL){
+    //    mobility = check_and_cast<inet::IMobility*>(temp);
+    //}
+   // else {
+   //     EV << "UEWarningAlertApp::initialize - \tWARNING: Mobility module NOT FOUND!" << endl;
+   //     throw cRuntimeError("UEWarningAlertApp::initialize - \tWARNING: Mobility module NOT FOUND!");
+   // }
 
     mecAppName = par("mecAppName").stringValue();
 
@@ -112,7 +112,7 @@ void UEWarningAlertApp::handleMessage(cMessage *msg)
 
         else if(!strcmp(msg->getName(), "selfMecAppStart"))
         {
-            sendMessageToMECApp();
+            sendMatrixToMECApp();
             scheduleAt(simTime() + period_, selfMecAppStart_);
         }
 
@@ -152,7 +152,7 @@ void UEWarningAlertApp::handleMessage(cMessage *msg)
             if (mePkt == 0)
                 throw cRuntimeError("UEWarningAlertApp::handleMessage - \tFATAL! Error when casting to WarningAppPacket");
 
-            if(!strcmp(mePkt->getType(), WARNING_ALERT))      handleInfoMEWarningAlertApp(msg);
+            if(!strcmp(mePkt->getType(), WARNING_ALERT))      handleInfoMEWarningAlertApp(msg);//modify this
             else if(!strcmp(mePkt->getType(), START_NACK))
             {
                 EV << "UEWarningAlertApp::handleMessage - MEC app did not started correctly, trying to start again" << endl;
@@ -164,6 +164,10 @@ void UEWarningAlertApp::handleMessage(cMessage *msg)
                 {
                     cancelEvent(selfMecAppStart_);
                 }
+            }
+            else if(!strcmp(mePkt->getType(), "matrix result"))
+            {
+                handleMatrixResult(msg);
             }
             else
             {
@@ -183,6 +187,7 @@ void UEWarningAlertApp::finish()
  */
 void UEWarningAlertApp::sendStartMEWarningAlertApp()
 {
+    EV<<"hhhhhh"<<endl;
     inet::Packet* packet = new inet::Packet("WarningAlertPacketStart");
     auto start = inet::makeShared<DeviceAppStartPacket>();
 
@@ -211,7 +216,7 @@ void UEWarningAlertApp::sendStartMEWarningAlertApp()
     }
 
     //rescheduling
-    scheduleAt(simTime() + period_, selfStart_);
+    //scheduleAt(simTime() + period_, selfStart_);
 }
 void UEWarningAlertApp::sendStopMEWarningAlertApp()
 {
@@ -249,7 +254,7 @@ void UEWarningAlertApp::sendStopMEWarningAlertApp()
 /*
  * ---------------------------------------------Receiver Side------------------------------------------
  */
-void UEWarningAlertApp::handleAckStartMEWarningAlertApp(cMessage* msg)
+void UEWarningAlertApp::handleAckStartMEWarningAlertApp(cMessage* msg)//from dev app
 {
     inet::Packet* packet = check_and_cast<inet::Packet*>(msg);
     auto pkt = packet->peekAtFront<DeviceAppStartAckPacket>();
@@ -272,8 +277,10 @@ void UEWarningAlertApp::handleAckStartMEWarningAlertApp(cMessage* msg)
         EV << "UEWarningAlertApp::handleAckStartMEWarningAlertApp - MEC application cannot be instantiated! Reason: " << pkt->getReason() << endl;
     }
 
-    sendMessageToMECApp();
-    scheduleAt(simTime() + period_, selfMecAppStart_);
+    sendMatrixToMECApp();
+    //scheduleAt(simTime() + 0.01, selfStart_);
+    //EV<<"hhhhhhh"<<endl;
+    //scheduleAt(simTime() + period_, selfMecAppStart_);
 
 }
 
@@ -306,7 +313,7 @@ void UEWarningAlertApp::sendMessageToMECApp(){
     EV << "UEWarningAlertApp::sendMessageToMECApp() - start Message sent to the MEC app" << endl;
 }
 
-void UEWarningAlertApp::handleInfoMEWarningAlertApp(cMessage* msg)
+void UEWarningAlertApp::handleInfoMEWarningAlertApp(cMessage* msg)//from mec app
 {
     inet::Packet* packet = check_and_cast<inet::Packet*>(msg);
     auto pkt = packet->peekAtFront<WarningAlertPacket>();
@@ -346,7 +353,20 @@ void UEWarningAlertApp::handleInfoMEWarningAlertApp(cMessage* msg)
         ue->getDisplayString().setTagArg("i",1, "green");
     }
 }
-void UEWarningAlertApp::handleAckStopMEWarningAlertApp(cMessage* msg)
+
+void UEWarningAlertApp::handleMatrixResult(cMessage* msg)
+{
+    inet::Packet* packet = check_and_cast<inet::Packet*>(msg);
+    auto pkt = packet->peekAtFront<Result>();
+
+    EV << "UEWarningAlertApp::handleMatrixResult - Received " << pkt->getType() << " type WarningAlertPacket"<< endl;
+
+    EV << "The result is " << pkt->getRes()<< endl;
+    
+    //delete msg;
+}
+
+void UEWarningAlertApp::handleAckStopMEWarningAlertApp(cMessage* msg)//from dev app
 {
 
     inet::Packet* packet = check_and_cast<inet::Packet*>(msg);
@@ -359,4 +379,24 @@ void UEWarningAlertApp::handleAckStopMEWarningAlertApp(cMessage* msg)
     ue->getDisplayString().setTagArg("i",1, "white");
 
     cancelEvent(selfStop_);
+}
+
+void UEWarningAlertApp::sendMatrixToMECApp(){
+    inet::Packet* pkt = new inet::Packet("Metrix");
+    //auto matrix = inet::makeShared<Matrix>();
+    auto matrix = inet::makeShared<BytesChunk>();
+    matrix->setBytes({1,2});
+    //matrix->setType("MatrixadataArrive");
+    //matrix->setX(20);
+    //matrix->setY(2000);
+    //matrix->setChunkLength(inet::B(2+sizeof(int)+sizeof(int)+1));
+    pkt->insertAtBack(matrix);
+    auto nouse = inet::makeShared<Matrix>();
+    nouse->setChunkLength(inet::B(1024));
+    pkt->insertAtBack(nouse);
+    socket.sendTo(pkt, mecAppAddress_ , mecAppPort_);
+
+    EV << "UEWarningAlertApp::sendMatrixToMECApp() - sent matrix to the MEC app" << endl;
+
+    //sendStartMEWarningAlertApp();
 }
