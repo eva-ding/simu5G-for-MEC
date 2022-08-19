@@ -54,33 +54,33 @@ network mutiMecHost
             @display("p=691.38,342.24;is=s");
         }
         upf: Upf {
-            @display("p=425.73624,249.77875;is=l");
+            @display("p=420.68,312.47626;is=l");
         }
         gNodeB1: gNodeB {
-            @display("p=140,250;is=vl");
+            @display("p=134.49625,312.47626;is=vl");
         }
         car[numCars]: NRUe {
-            @display("p=300,300");
+            @display("p=294.27374,362.0275");
         }
         //# MEC module
         mecHost1: MECHost {
-            @display("p=402.4775,71.79875;is=l");
+            @display("p=397.42126,134.49625;is=l");
         }
         mecHost2: MECHost {
-            @display("p=479.3325,32.36;is=l");
+            @display("p=474.27625,95.0575;is=l");
         }
         mecHost3: MECHost {
-            @display("p=479.3325,184.0475;is=l");
+            @display("p=484.38876,223.48625;is=l");
         }
         mecHost4: MECHost {
-            @display("p=544.0525,115.2825;is=l");
+            @display("p=541.01874,163.8225;is=l");
         }
         mecOrchestrator: MecOrchestrator {
-            @display("p=564.2775,249.77875;is=l");
+            @display("p=559.22125,312.47626;is=l");
         }
 
         ualcmp: UALCMP {
-            @display("p=490.45624,248.7675;i=device/smallrouter");
+            @display("p=485.4,311.465;i=device/smallrouter");
         }
 
 
@@ -98,5 +98,5 @@ network mutiMecHost
         mecHost2.ppp++ <--> Eth10G <--> mecHost1.ppp++;
         mecHost3.ppp++ <--> Eth10G <--> mecHost1.ppp++;
         mecHost4.ppp++ <--> Eth10G <--> mecHost1.ppp++;
-        
+
 }
