@@ -60,7 +60,7 @@ network singleMecHost
             @display("p=100,300;is=vl");
         }
         car[numCars]: NRUe {
-            @display("p=400,300");
+            @display("p=200,300");
         }
         //# MEC module
         mecHost: MECHost {
@@ -79,10 +79,10 @@ network singleMecHost
     connections allowunconnected:
 
         upf.pppg++ <--> Eth10G <--> gNodeB1.ppp;
-        ualcmp.ppp++ <--> Eth10G <--> upf.filterGate;  
-        
+        ualcmp.ppp++ <--> Eth10G <--> upf.filterGate;
+
         ualcmp.toMecOrchestrator --> mecOrchestrator.fromUALCMP;
-        ualcmp.fromMecOrchestrator <-- mecOrchestrator.toUALCMP;     
+        ualcmp.fromMecOrchestrator <-- mecOrchestrator.toUALCMP;
 
         //#	mec
         // direct connection between gNodeB1 and mecHost

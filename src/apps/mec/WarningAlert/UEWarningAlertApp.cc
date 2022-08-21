@@ -148,31 +148,32 @@ void UEWarningAlertApp::handleMessage(cMessage *msg)
         // From MEC application
         else
         {
-            auto mePkt = packet->peekAtFront<WarningAppPacket>();
-            if (mePkt == 0)
-                throw cRuntimeError("UEWarningAlertApp::handleMessage - \tFATAL! Error when casting to WarningAppPacket");
+            handleMatrixResult(msg);
+            // auto mePkt = packet->peekAtFront<WarningAppPacket>();
+            // if (mePkt == 0)
+            //     throw cRuntimeError("UEWarningAlertApp::handleMessage - \tFATAL! Error when casting to WarningAppPacket");
 
-            if(!strcmp(mePkt->getType(), WARNING_ALERT))      handleInfoMEWarningAlertApp(msg);//modify this
-            else if(!strcmp(mePkt->getType(), START_NACK))
-            {
-                EV << "UEWarningAlertApp::handleMessage - MEC app did not started correctly, trying to start again" << endl;
-            }
-            else if(!strcmp(mePkt->getType(), START_ACK))
-            {
-                EV << "UEWarningAlertApp::handleMessage - MEC app started correctly" << endl;
-                if(selfMecAppStart_->isScheduled())
-                {
-                    cancelEvent(selfMecAppStart_);
-                }
-            }
-            else if(!strcmp(mePkt->getType(), "matrix result"))
-            {
-                handleMatrixResult(msg);
-            }
-            else
-            {
-                throw cRuntimeError("UEWarningAlertApp::handleMessage - \tFATAL! Error, WarningAppPacket type %s not recognized", mePkt->getType());
-            }
+            // if(!strcmp(mePkt->getType(), WARNING_ALERT))      handleInfoMEWarningAlertApp(msg);//modify this
+            // else if(!strcmp(mePkt->getType(), START_NACK))
+            // {
+            //     EV << "UEWarningAlertApp::handleMessage - MEC app did not started correctly, trying to start again" << endl;
+            // }
+            // else if(!strcmp(mePkt->getType(), START_ACK))
+            // {
+            //     EV << "UEWarningAlertApp::handleMessage - MEC app started correctly" << endl;
+            //     if(selfMecAppStart_->isScheduled())
+            //     {
+            //         cancelEvent(selfMecAppStart_);
+            //     }
+            // }
+            // else if(!strcmp(mePkt->getType(), "matrix result"))
+            // {
+            //     handleMatrixResult(msg);
+            // }
+            // else
+            // {
+            //     throw cRuntimeError("UEWarningAlertApp::handleMessage - \tFATAL! Error, WarningAppPacket type %s not recognized", mePkt->getType());
+            // }
         }
         delete msg;
     }
@@ -357,11 +358,20 @@ void UEWarningAlertApp::handleInfoMEWarningAlertApp(cMessage* msg)//from mec app
 void UEWarningAlertApp::handleMatrixResult(cMessage* msg)
 {
     inet::Packet* packet = check_and_cast<inet::Packet*>(msg);
-    auto pkt = packet->peekAtFront<Result>();
+    auto pkt = dynamicPtrCast<const BytesChunk>(packet->peekAtFront<BytesChunk>());
 
-    EV << "UEWarningAlertApp::handleMatrixResult - Received " << pkt->getType() << " type WarningAlertPacket"<< endl;
+    EV << "UEWarningAlertApp::handleMatrixResult - Received " << endl;
+    EV << pkt->getByteArraySize() << " elements are "<<pkt->getByte(1);//type is char????
+    // for(int i = 0; i<pkt->getByteArraySize(); i++){
+    //     if(i == 0)
+    //     EV << "The result is " << (int)pkt->getByte(i) << " ";
+    //     else if (i == pkt->getByteArraySize()-1)
+    //     EV << (int)pkt->getByte(i)<< endl;
+    //     else
+    //     EV << (int)pkt->getByte(i)<<" ";
+        
+    // }
 
-    EV << "The result is " << pkt->getRes()<< endl;
     
     //delete msg;
 }
@@ -385,15 +395,16 @@ void UEWarningAlertApp::sendMatrixToMECApp(){
     inet::Packet* pkt = new inet::Packet("Metrix");
     //auto matrix = inet::makeShared<Matrix>();
     auto matrix = inet::makeShared<BytesChunk>();
-    matrix->setBytes({1,2});
+    std::vector<uint8_t> data(20000,1);
+    matrix->setBytes(data);
     //matrix->setType("MatrixadataArrive");
     //matrix->setX(20);
     //matrix->setY(2000);
     //matrix->setChunkLength(inet::B(2+sizeof(int)+sizeof(int)+1));
     pkt->insertAtBack(matrix);
-    auto nouse = inet::makeShared<Matrix>();
-    nouse->setChunkLength(inet::B(1024));
-    pkt->insertAtBack(nouse);
+    //auto nouse = inet::makeShared<Matrix>();
+    //nouse->setChunkLength(inet::B(1024));
+    //pkt->insertAtBack(nouse);
     socket.sendTo(pkt, mecAppAddress_ , mecAppPort_);
 
     EV << "UEWarningAlertApp::sendMatrixToMECApp() - sent matrix to the MEC app" << endl;

@@ -88,8 +88,8 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
             }
             auto pk = check_and_cast<Packet *>(msg);
             auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
-            int numOfPara = 1024;//8*matrixPk->getByteArraySize();
-            double time = vim->calculateProcessingTime(mecAppId, 10*numOfPara/1000000);//todo how to measure time
+            int dim = sqrt(matrixPk->getByteArraySize());
+            double time = vim->calculateProcessingTime(mecAppId, 10*dim*dim*dim/1000000);//todo how to measure time
             pac = check_and_cast<Packet *>(msg)->dup();
             scheduleAt(simTime()+time,processedUERequest);
             //handleUeMessage(msg);
@@ -145,18 +145,20 @@ void MECWarningAlertApp::handleUeMessage(omnetpp::cMessage *msg)
         //double time = vim->calculateProcessingTime(mecAppId, 150);
         //x = matrixPk->getX();
         //y = matrixPk->getY();
-        int ans = 0;
-        for(int i = 0; i<matrixPk->getByteArraySize(); i++){
-            ans += 2 * matrixPk->getByte(i);
-        }
+        // int ans = 0;
+        // for(int i = 0; i<matrixPk->getByteArraySize(); i++){
+        //     ans += 2 * matrixPk->getByte(i);
+        // }
 
         //int ans = x * y;
-
-        auto info = inet::makeShared<Result>();
-        info->setType("matrix result");
-        info->setChunkLength(inet::B(sqrt(1024*5)));
-        info->addTagIfAbsent<inet::CreationTimeTag>()->setCreationTime(simTime());
-        info->setRes(ans);
+        std::vector<uint8_t> ans(40000,20);
+        auto info = inet::makeShared<BytesChunk>();
+        info->setBytes(ans);
+        // auto info = inet::makeShared<Result>();
+        // info->setType("matrix result");
+        // info->setChunkLength(inet::B(sqrt(1024*5)));
+        // info->addTagIfAbsent<inet::CreationTimeTag>()->setCreationTime(simTime());
+        // info->setRes(ans);
         //EV<< info->str()<< endl;
         inet::Packet* packet = new inet::Packet("Matrix Result");
         packet->insertAtBack(info);
