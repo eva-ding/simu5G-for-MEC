@@ -78,6 +78,10 @@ class MECWarningAlertApp : public MecAppBase
     int x;
     int y;
 
+    int numOfSubResult;
+
+    std::vector<uint8_t> result;
+
     //cMessage *message;
 
     protected:

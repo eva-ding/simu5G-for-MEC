@@ -25,6 +25,8 @@
 #include "nodes/mec/MECPlatform/MECServices/packets/HttpResponseMessage/HttpResponseMessage.h"
 
 #include <fstream>
+#include <cstdlib>
+#include <ctime>
 
 Define_Module(MECWarningAlertApp);
 
@@ -87,6 +89,7 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
         if(ueSocket.belongsToSocket(msg))
         {
             //TODO cut packet and send to worker
+            numOfSubResult = 0;
             sendSubMatrix(msg);
             // if (getParentModule()->getName() == "mecHost1"){
             //     //TODO
@@ -107,8 +110,11 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
             if (strcmp(msg->getName(), "SubMatrix") == 0){
             auto pk = check_and_cast<Packet *>(msg);
             auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
-            int numOfPara = 1024;//8*matrixPk->getByteArraySize();
-            double time = vim->calculateProcessingTime(mecAppId, 10*numOfPara/1000000);//todo how to measure time
+            int numOfPara = matrixPk->getByteArraySize();
+            //srand(time(NULL));
+            double time = vim->calculateProcessingTime(mecAppId, 10*200*200*100/1000000);//todo how to measure time
+            time = time + (rand() % 1000 / (float)1000) /5 * time;
+            EV<< "test time:" << time;
             pac = check_and_cast<Packet *>(msg)->dup();
             scheduleAt(simTime()+time,processedHostRequest);
             //handleUeMessage(msg);
@@ -116,7 +122,7 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
             return;
             }
             if (strcmp(msg->getName(), "SubResult") == 0){
-                //collect();
+                if (collect(msg)) sendResultToUe();
             }
 
         }
@@ -146,24 +152,30 @@ void MECWarningAlertApp::sendSubMatrix(omnetpp::cMessage *msg){
     ueAppAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
     ueAppPort = pk->getTag<L4PortInd>()->getSrcPort();
 
-    auto submatrix = inet::makeShared<BytesChunk>();
-    submatrix->setBytes({1,2});
+    auto submatrix1 = inet::makeShared<BytesChunk>();
+    submatrix1->setBytes(std::vector<uint8_t>(20000,1));
+    auto submatrix2 = inet::makeShared<BytesChunk>();
+    submatrix2->setBytes(std::vector<uint8_t>(20000,2));
     //matrix->setType("MatrixadataArrive");
     //matrix->setX(20);
     //matrix->setY(2000);
     //matrix->setChunkLength(inet::B(2+sizeof(int)+sizeof(int)+1));
-    auto nouse = inet::makeShared<Matrix>();
-    nouse->setChunkLength(inet::B(1024));
+    // auto nouse = inet::makeShared<Matrix>();
+    // nouse->setX(1);
+    // nouse->setChunkLength(inet::B(1));
 
     inet::Packet* packet1 = new inet::Packet("SubMatrix");
     inet::Packet* packet2 = new inet::Packet("SubMatrix");
     inet::Packet* packet3 = new inet::Packet("SubMatrix");
-    packet1->insertAtBack(submatrix);
-    packet1->insertAtBack(nouse);
-    packet2->insertAtBack(submatrix);
-    packet2->insertAtBack(nouse);
-    packet3->insertAtBack(submatrix);
-    packet3->insertAtBack(nouse);
+    // packet1->insertAtBack(nouse);
+    packet1->insertAtBack(submatrix1);
+    // packet1->insertAtBack(nouse);
+    // nouse->setX(2);
+    // packet2->insertAtBack(nouse);
+    packet2->insertAtBack(submatrix1);
+    // nouse->setX(3);
+    // packet3->insertAtBack(nouse);
+    packet3->insertAtBack(submatrix2);
     hostSocket.sendTo(packet1, L3AddressResolver().resolve("192.168.4.2"),4002);
     hostSocket.sendTo(packet2, L3AddressResolver().resolve("192.168.5.2"),4002);
     hostSocket.sendTo(packet3, L3AddressResolver().resolve("192.168.6.2"),4002);
@@ -174,13 +186,30 @@ void MECWarningAlertApp::sendSubMatrix(omnetpp::cMessage *msg){
 bool MECWarningAlertApp::collect(omnetpp::cMessage *msg){
     //TODO if the data is enough,send Result;
     //sendResultToUe();
+    numOfSubResult++;
+    auto pk = check_and_cast<Packet *>(msg);
+    // auto sequence = dynamicPtrCast<const Result>(pk->peekAtFront<Result>());
+    auto subResult = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
+    // if(sequence->getRes() == 1 || sequence->getRes() == 2){
+    //     if(numOfSubResult != 1){result.insert(result.end(),subResult->getBytes().begin(),subResult->getBytes().end());}//change 20000 element at front
+    //     else
+    //     result.insert(result.end(),subResult->getBytes().begin(),subResult->getBytes().end());
+    // }
+    // else{
+    //     if(numOfSubResult == 1) result.insert(result.end(),subResult->getBytes().begin(),subResult->getBytes().end());
+    //     else result.insert(result.end(),subResult->getBytes().begin(),subResult->getBytes().end());//change subResult then insert
+    // }
+    
+    if (numOfSubResult == 2) return true;
+    else return false;
 }
 
 void MECWarningAlertApp::sendResultToUe(){
     EV << "MECWarningAlertApp::sendResultToUe - send total result" << endl;
 
     auto info = inet::makeShared<BytesChunk>();
-    info->setBytes({1,2,3,4,5,6,7,8,9});
+    result = std::vector<uint8_t>(40000,200);
+    info->setBytes(result);
     info->addTagIfAbsent<inet::CreationTimeTag>()->setCreationTime(simTime());
 
     inet::Packet* packet = new inet::Packet("Matrix Result");
@@ -196,22 +225,30 @@ void MECWarningAlertApp::handleMasterMessage(omnetpp::cMessage *msg){
 
     EV << "MECWarningAlertApp::handleMasterMessage - sub matrix data arrived" << endl;
 
+    // auto seq = dynamicPtrCast<const Matrix>(pk->peekAtFront<Matrix>());
     auto submatrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
     if(submatrixPk == nullptr)
         throw cRuntimeError("MECWarningAlertApp::handleUeMessage - matrix data is null");
 
-    int ans = 0;
-    for(int i = 0; i<submatrixPk->getByteArraySize(); i++){
-        ans += 2 * submatrixPk->getByte(i);
-    }
+    // int ans = 0;
+    // for(int i = 0; i<submatrixPk->getByteArraySize(); i++){
+    //     ans += 2 * submatrixPk->getByte(i);
+    // }
 
-    auto info = inet::makeShared<Result>();
-    info->setType("submatrix result");
-    info->setChunkLength(inet::B(sqrt(1024)));
-    info->addTagIfAbsent<inet::CreationTimeTag>()->setCreationTime(simTime());
-    info->setRes(ans);
+    auto info = inet::makeShared<BytesChunk>();
+    // if(seq->getX() == 1 || seq->getX() == 2) 
+    info->setBytes(std::vector<uint8_t>(20000,200));
+    // else info->setBytes(std::vector<uint8_t>(20000,200));
+    // auto nouse = inet::makeShared<Result>();
+    // nouse->setRes(seq->getX());
+    // nouse->setChunkLength(B(1));
+    // info->setType("submatrix result");
+    // info->setChunkLength(inet::B(sqrt(1024)));
+    // info->addTagIfAbsent<inet::CreationTimeTag>()->setCreationTime(simTime());
+    // info->setRes(ans);
 
     inet::Packet* packet = new inet::Packet("SubResult");
+    // packet->insertAtBack(nouse);
     packet->insertAtBack(info);
     hostSocket.sendTo(packet, masterAppAddress, masterAppPort);
     

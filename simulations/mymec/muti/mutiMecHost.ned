@@ -60,7 +60,7 @@ network mutiMecHost
             @display("p=134.49625,312.47626;is=vl");
         }
         car[numCars]: NRUe {
-            @display("p=294.27374,362.0275");
+            @display("p=294.27374,312.0275");
         }
         //# MEC module
         mecHost1: MECHost {
