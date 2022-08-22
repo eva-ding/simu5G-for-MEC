@@ -361,15 +361,15 @@ void UEWarningAlertApp::handleMatrixResult(cMessage* msg)
     auto pkt = dynamicPtrCast<const BytesChunk>(packet->peekAtFront<BytesChunk>());
 
     EV << "UEWarningAlertApp::handleMatrixResult - Received " << endl;
-    for(int i = 0; i<pkt->getByteArraySize(); i++){
-        if(i == 0)
-        EV << "The result is " << (int)pkt->getByte(i) << " ";
-        else if (i == pkt->getByteArraySize()-1)
-        EV << (int)pkt->getByte(i)<< endl;
-        else
-        EV << (int)pkt->getByte(i)<<" ";
+    // for(int i = 0; i<pkt->getByteArraySize(); i++){
+    //     if(i == 0)
+    //     EV << "The result is " << (int)pkt->getByte(i) << " ";
+    //     else if (i == pkt->getByteArraySize()-1)
+    //     EV << (int)pkt->getByte(i)<< endl;
+    //     else
+    //     EV << (int)pkt->getByte(i)<<" ";
         
-    }
+    // }
 
     
     //delete msg;
