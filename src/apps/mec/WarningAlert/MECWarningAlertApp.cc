@@ -89,20 +89,22 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
         if(ueSocket.belongsToSocket(msg))
         {
             //TODO cut packet and send to worker
-            numOfSubResult = 0;
-            sendSubMatrix(msg);
+            // numOfSubResult = 0;
+            // sendSubMatrix(msg);
             // if (getParentModule()->getName() == "mecHost1"){
             //     //TODO
             // }
-            // auto pk = check_and_cast<Packet *>(msg);
-            // auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
-            // int numOfPara = 1024;//8*matrixPk->getByteArraySize();
-            // double time = vim->calculateProcessingTime(mecAppId, 10*numOfPara/1000000);//todo how to measure time
-            // pac = check_and_cast<Packet *>(msg)->dup();
-            // scheduleAt(simTime()+time,processedUERequest);
+            auto pk = check_and_cast<Packet *>(msg);
+            auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
+            int numOfPara = matrixPk->getByteArraySize();
+            double time = vim->calculateProcessingTime(mecAppId, 10*100*200*200/1000000);//todo how to measure time
+            time = time + (rand() % 1000 / (float)1000) /5 * time;
+            EV<< "test time:" << time;
+            pac = check_and_cast<Packet *>(msg)->dup();
+            scheduleAt(simTime()+time,processedHostRequest);
             // //handleUeMessage(msg);
-            // delete msg;
-            // return;
+            delete msg;
+            return;
         }
         else
         {
@@ -220,8 +222,8 @@ void MECWarningAlertApp::sendResultToUe(){
 
 void MECWarningAlertApp::handleMasterMessage(omnetpp::cMessage *msg){
     auto pk = check_and_cast<Packet *>(msg);
-    masterAppAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
-    masterAppPort = pk->getTag<L4PortInd>()->getSrcPort();
+    ueAppAddress = pk->getTag<L3AddressInd>()->getSrcAddress();
+    ueAppPort = pk->getTag<L4PortInd>()->getSrcPort();
 
     EV << "MECWarningAlertApp::handleMasterMessage - sub matrix data arrived" << endl;
 
@@ -250,7 +252,7 @@ void MECWarningAlertApp::handleMasterMessage(omnetpp::cMessage *msg){
     inet::Packet* packet = new inet::Packet("SubResult");
     // packet->insertAtBack(nouse);
     packet->insertAtBack(info);
-    hostSocket.sendTo(packet, masterAppAddress, masterAppPort);
+    ueSocket.sendTo(packet, ueAppAddress, ueAppPort);
     
 }
 

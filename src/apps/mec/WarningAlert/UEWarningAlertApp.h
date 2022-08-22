@@ -79,6 +79,8 @@ class UEWarningAlertApp: public cSimpleModule
     // uses to write in a log a file
     bool log;
 
+    int numOfResult;
+
     public:
         ~UEWarningAlertApp();
         UEWarningAlertApp();

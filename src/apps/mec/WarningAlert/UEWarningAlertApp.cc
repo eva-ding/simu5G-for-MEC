@@ -357,19 +357,21 @@ void UEWarningAlertApp::handleInfoMEWarningAlertApp(cMessage* msg)//from mec app
 
 void UEWarningAlertApp::handleMatrixResult(cMessage* msg)
 {
+    numOfResult++;
+    if(numOfResult == 2) EV << "UEWarningAlertApp::handleMatrixResult - enough for construct result " << endl;
     inet::Packet* packet = check_and_cast<inet::Packet*>(msg);
     auto pkt = dynamicPtrCast<const BytesChunk>(packet->peekAtFront<BytesChunk>());
 
     EV << "UEWarningAlertApp::handleMatrixResult - Received " << endl;
-    for(int i = 0; i<pkt->getByteArraySize(); i++){
-        if(i == 0)
-        EV << "The result is " << (int)pkt->getByte(i) << " ";
-        else if (i == pkt->getByteArraySize()-1)
-        EV << (int)pkt->getByte(i)<< endl;
-        else
-        EV << (int)pkt->getByte(i)<<" ";
+    // for(int i = 0; i<pkt->getByteArraySize(); i++){
+    //     if(i == 0)
+    //     EV << "The result is " << (int)pkt->getByte(i) << " ";
+    //     else if (i == pkt->getByteArraySize()-1)
+    //     EV << (int)pkt->getByte(i)<< endl;
+    //     else
+    //     EV << (int)pkt->getByte(i)<<" ";
         
-    }
+    // }
 
     
     //delete msg;
@@ -391,10 +393,12 @@ void UEWarningAlertApp::handleAckStopMEWarningAlertApp(cMessage* msg)//from dev 
 }
 
 void UEWarningAlertApp::sendMatrixToMECApp(){
+    numOfResult = 0;
+
     inet::Packet* pkt = new inet::Packet("Metrix");
     //auto matrix = inet::makeShared<Matrix>();
     auto matrix = inet::makeShared<BytesChunk>();
-    std::vector<uint8_t> data(40000,1);
+    std::vector<uint8_t> data(20000,1);
     matrix->setBytes(data);
     //matrix->setType("MatrixadataArrive");
     //matrix->setX(20);
@@ -404,7 +408,9 @@ void UEWarningAlertApp::sendMatrixToMECApp(){
     // auto nouse = inet::makeShared<Matrix>();
     // nouse->setChunkLength(inet::B(1024));
     // pkt->insertAtBack(nouse);
-    socket.sendTo(pkt, mecAppAddress_ , mecAppPort_);
+    socket.sendTo(pkt->dup(), L3AddressResolver().resolve("192.168.5.2"),4001);
+    socket.sendTo(pkt->dup(), L3AddressResolver().resolve("192.168.6.2"),4001);
+    socket.sendTo(pkt->dup(), L3AddressResolver().resolve("192.168.7.2"),4001);
 
     EV << "UEWarningAlertApp::sendMatrixToMECApp() - sent matrix to the MEC app" << endl;
 
