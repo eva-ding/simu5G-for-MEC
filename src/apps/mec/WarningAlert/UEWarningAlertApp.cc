@@ -395,7 +395,7 @@ void UEWarningAlertApp::sendMatrixToMECApp(){
     inet::Packet* pkt = new inet::Packet("Metrix");
     //auto matrix = inet::makeShared<Matrix>();
     auto matrix = inet::makeShared<BytesChunk>();
-    std::vector<uint8_t> data(20000,1);
+    std::vector<uint8_t> data(40000,1);
     matrix->setBytes(data);
     //matrix->setType("MatrixadataArrive");
     //matrix->setX(20);

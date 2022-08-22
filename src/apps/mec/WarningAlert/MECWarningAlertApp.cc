@@ -90,6 +90,8 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
             auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
             int dim = sqrt(matrixPk->getByteArraySize());
             double time = vim->calculateProcessingTime(mecAppId, 10*dim*dim*dim/1000000);//todo how to measure time
+            time = time + (rand() % 1000 / (float)1000) /5 * time;
+            EV<< "test time:" << time;
             pac = check_and_cast<Packet *>(msg)->dup();
             scheduleAt(simTime()+time,processedUERequest);
             //handleUeMessage(msg);
