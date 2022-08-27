@@ -168,6 +168,7 @@ void UALCMPApp::handleCreateContextAppAckMessage(UALCMPMessage *msg)
             std::stringstream uri;
             uri << baseUriQueries_<<"/app_contexts/"<< ack->getContextId();
             std::pair<std::string, std::string> locHeader("Location: ", uri.str());
+            EV << "UALCMP:sending instantiate information to Device app!"<< endl;
             Http::send201Response(socket, jsonBody.dump().c_str(), locHeader);
 
         }
@@ -347,6 +348,7 @@ void UALCMPApp::handlePOSTRequest(const HttpRequestMessage *currentRequestMessag
             requestSno++;
 
             send(createContext, "toMecOrchestrator");
+            EV <<"UALCMP:sending start MEC app request to MEC orchestrator!"<<endl;
         }
         else
         {

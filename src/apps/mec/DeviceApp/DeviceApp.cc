@@ -81,7 +81,7 @@ void DeviceApp::handleUALCMPMessage()
 
                     if(found == false)
                     {
-                        EV << "DeviceApp::handleUALCMPMessage: application descriptor for appName: " << appName << " not found." << endl;
+                        // EV << "DeviceApp::handleUALCMPMessage: application descriptor for appName: " << appName << " not found." << endl;
                         jsonRequestBody["associateDevAppId"] = std::to_string(getId());
                         jsonRequestBody["appInfo"]["appPackageSource"] = appPackageSource; //"ApplicationDescriptors/WarningAlertApp.json";
 
@@ -95,6 +95,8 @@ void DeviceApp::handleUALCMPMessage()
                     std::string host = UALCMPSocket_.getRemoteAddress().str()+":"+std::to_string(UALCMPSocket_.getRemotePort());
 
                     Http::sendPostRequest(&UALCMPSocket_, jsonRequestBody.dump().c_str(), host.c_str(), uri);
+
+                    EV <<"Device app:sending start MEC app request to UALCMP!"<<endl;
 
                     //send request
                     appState = CREATING;
@@ -168,7 +170,7 @@ void DeviceApp::handleUALCMPMessage()
 
                         packet->insertAtBack(ack);
                     }
-
+                    EV << "Device app:sending instantiate information to UE app!"<< endl;
                     ueAppSocket_.sendTo(packet, ueAppAddress, ueAppPort);
 
                     appState = APPCREATED;

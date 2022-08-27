@@ -188,7 +188,8 @@ void UEWarningAlertApp::finish()
  */
 void UEWarningAlertApp::sendStartMEWarningAlertApp()
 {
-    EV<<"hhhhhh"<<endl;
+    // EV<<"hhhhhh"<<endl;
+    EV << "UE app:sending start MEC app request to Device app!" <<endl;
     inet::Packet* packet = new inet::Packet("WarningAlertPacketStart");
     auto start = inet::makeShared<DeviceAppStartPacket>();
 
@@ -265,6 +266,7 @@ void UEWarningAlertApp::handleAckStartMEWarningAlertApp(cMessage* msg)//from dev
         mecAppAddress_ = L3AddressResolver().resolve(pkt->getIpAddress());
         mecAppPort_ = pkt->getPort();
         EV << "UEWarningAlertApp::handleAckStartMEWarningAlertApp - Received " << pkt->getType() << " type WarningAlertPacket. mecApp isntance is at: "<< mecAppAddress_<< ":" << mecAppPort_ << endl;
+        EV << "UE app:instantiate information had been received!"<< endl;
         cancelEvent(selfStart_);
         //scheduling sendStopMEWarningAlertApp()
         if(!selfStop_->isScheduled()){
@@ -360,8 +362,8 @@ void UEWarningAlertApp::handleMatrixResult(cMessage* msg)
     inet::Packet* packet = check_and_cast<inet::Packet*>(msg);
     auto pkt = dynamicPtrCast<const BytesChunk>(packet->peekAtFront<BytesChunk>());
 
-    EV << "UEWarningAlertApp::handleMatrixResult - Received " << endl;
-    EV << pkt->getByteArraySize() << " elements are "<<pkt->getByte(1);//type is char????
+    EV << "UE app:receive the result!" << endl;
+    EV << "receive " << pkt->getByteArraySize() << " elements!"<<pkt->getByte(1);//type is char????
     // for(int i = 0; i<pkt->getByteArraySize(); i++){
     //     if(i == 0)
     //     EV << "The result is " << (int)pkt->getByte(i) << " ";
@@ -407,7 +409,7 @@ void UEWarningAlertApp::sendMatrixToMECApp(){
     //pkt->insertAtBack(nouse);
     socket.sendTo(pkt, mecAppAddress_ , mecAppPort_);
 
-    EV << "UEWarningAlertApp::sendMatrixToMECApp() - sent matrix to the MEC app" << endl;
+    EV << "UE app:sending matrix to the MEC app!" << endl;
 
     //sendStartMEWarningAlertApp();
 }

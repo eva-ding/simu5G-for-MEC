@@ -90,7 +90,7 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
             auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
             int dim = sqrt(matrixPk->getByteArraySize());
             double time = vim->calculateProcessingTime(mecAppId, 10*dim*dim*dim/1000000);//todo how to measure time
-            time = time + (rand() % 1000 / (float)1000) /5 * time;
+            // time = time + (rand() % 1000 / (float)1000) /5 * time;
             EV<< "test time:" << time;
             pac = check_and_cast<Packet *>(msg)->dup();
             scheduleAt(simTime()+time,processedUERequest);
@@ -139,7 +139,7 @@ void MECWarningAlertApp::handleUeMessage(omnetpp::cMessage *msg)
 
     //if(strcmp(mecPk->getType(), "MatrixadataArrive") == 0)
     //{
-        EV << "MECWarningAlertApp::handleUeMessage - matrix data arrived" << endl;
+        EV << "MEC app:matrix data arrive!" << endl;
         //auto matrixPk = dynamicPtrCast<const Matrix>(mecPk);
         auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
         if(matrixPk == nullptr)
@@ -164,6 +164,7 @@ void MECWarningAlertApp::handleUeMessage(omnetpp::cMessage *msg)
         //EV<< info->str()<< endl;
         inet::Packet* packet = new inet::Packet("Matrix Result");
         packet->insertAtBack(info);
+        EV << "MEC app:sending result to UE app!" << endl;
         ueSocket.sendTo(packet, ueAppAddress, ueAppPort);
         // ueSocket.sendTo(test,L3AddressResolver().resolve("192.168.4.2"),4001);
 

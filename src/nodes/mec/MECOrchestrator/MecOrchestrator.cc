@@ -160,7 +160,7 @@ void MecOrchestrator::startMECApp(UALCMPMessage* msg)
     }
 
     const ApplicationDescriptor& desc = it->second;
-
+    EV << "MEC orchestrator:finding the best MEC host!" << endl;
     cModule* bestHost = findBestMecHost(desc);
 
     if(bestHost != nullptr)
@@ -247,7 +247,7 @@ void MecOrchestrator::startMECApp(UALCMPMessage* msg)
              EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost4" << " at "<< ip3.str() << ":" << port3 << endl;
 
              }
-
+             EV <<"MEC host:instantiate MEC app on MEC host!"<<endl;
              appInfo = mecpm->instantiateMEApp(createAppMsg);
              newMecApp.isEmulated = false;
          }
@@ -395,6 +395,7 @@ void MecOrchestrator::sendCreateAppContextAck(bool result, unsigned int requestS
     {
         ack->setSuccess(false);
     }
+    EV << "MEC orchestrator:sending instantiate information to UALCMP!"<< endl;
     send(ack, "toUALCMP");
 }
 
