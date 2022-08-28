@@ -391,7 +391,7 @@ void UEWarningAlertApp::handleAckStopMEWarningAlertApp(cMessage* msg)//from dev 
 }
 
 void UEWarningAlertApp::sendMatrixToMECApp(){
-    inet::Packet* pkt = new inet::Packet("Metrix");
+    inet::Packet* pkt = new inet::Packet("Matrix");
     //auto matrix = inet::makeShared<Matrix>();
     auto matrix = inet::makeShared<BytesChunk>();
     std::vector<uint8_t> data(40000,1);

@@ -86,7 +86,7 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
 //        MecAppBase::handleMessage(msg);
     if (!msg->isSelfMessage())
     {
-        if(ueSocket.belongsToSocket(msg))
+        if(strcmp(msg->getName(), "Matrix") == 0)// if(ueSocket.belongsToSocket(msg))
         {
             //TODO cut packet and send to worker
             numOfSubResult = 0;
@@ -176,9 +176,18 @@ void MECWarningAlertApp::sendSubMatrix(omnetpp::cMessage *msg){
     // nouse->setX(3);
     // packet3->insertAtBack(nouse);
     packet3->insertAtBack(submatrix2);
-    hostSocket.sendTo(packet1, L3AddressResolver().resolve("192.168.4.2"),4002);
-    hostSocket.sendTo(packet2, L3AddressResolver().resolve("192.168.5.2"),4002);
-    hostSocket.sendTo(packet3, L3AddressResolver().resolve("192.168.6.2"),4002);
+    if(!strcmp(getOwner()->getFullName(),"mecHost1")){
+    hostSocket.sendTo(packet1, L3AddressResolver().resolve("192.168.8.2"),4001);
+    hostSocket.sendTo(packet2, L3AddressResolver().resolve("192.168.9.2"),4001);
+    hostSocket.sendTo(packet3, L3AddressResolver().resolve("192.168.10.2"),4001);}
+    else if(!strcmp(getOwner()->getFullName(),"mecHost2")){
+    hostSocket.sendTo(packet1, L3AddressResolver().resolve("192.168.19.2"),4001);
+    hostSocket.sendTo(packet2, L3AddressResolver().resolve("192.168.20.2"),4001);
+    hostSocket.sendTo(packet3, L3AddressResolver().resolve("192.168.21.2"),4001);}
+    else {
+    hostSocket.sendTo(packet1, L3AddressResolver().resolve("192.168.30.1"),4001);
+    hostSocket.sendTo(packet2, L3AddressResolver().resolve("192.168.33.1"),4001);
+    hostSocket.sendTo(packet3, L3AddressResolver().resolve("192.168.36.1"),4001);}
 
     EV << "UEWarningAlertApp::sendSubMatrix() - sent submatrix to the worker MEC app" << endl;
 }

@@ -229,22 +229,53 @@ void MecOrchestrator::startMECApp(UALCMPMessage* msg)
          }
          else
          {
-             if (mecHosts.size() != 1){
-             auto cAM1 = createAppMsg->dup();
-             auto cAM2 = createAppMsg->dup();
-             auto cAM3 = createAppMsg->dup();
-             auto info2 = check_and_cast<MecPlatformManager*>(mecHosts[1]->getSubmodule("mecPlatformManager"))->instantiateMEApp(cAM1);
-             auto info3 = check_and_cast<MecPlatformManager*>(mecHosts[2]->getSubmodule("mecPlatformManager"))->instantiateMEApp(cAM2);
-             auto info4 = check_and_cast<MecPlatformManager*>(mecHosts[3]->getSubmodule("mecPlatformManager"))->instantiateMEApp(cAM3);
+            //  if (mecHosts.size() != 1){
+            //  auto cAM1 = createAppMsg->dup();
+            //  auto cAM2 = createAppMsg->dup();
+            //  auto cAM3 = createAppMsg->dup();
+            if(getSimulation()->getModule(14) == bestHost){
+             auto info2 = check_and_cast<MecPlatformManager*>(getSimulation()->getModule(15)->getSubmodule("mecPlatformManager"))->instantiateMEApp(createAppMsg->dup());
+             auto info3 = check_and_cast<MecPlatformManager*>(getSimulation()->getModule(16)->getSubmodule("mecPlatformManager"))->instantiateMEApp(createAppMsg->dup());
+             auto info4 = check_and_cast<MecPlatformManager*>(getSimulation()->getModule(17)->getSubmodule("mecPlatformManager"))->instantiateMEApp(createAppMsg->dup());
              ip1 = info2.endPoint.addr;
              port1 = info2.endPoint.port;
              ip2 = info3.endPoint.addr;
              port2 = info3.endPoint.port;
              ip3 = info4.endPoint.addr;
              port3 = info4.endPoint.port;
-             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost2" << " at "<< ip1.str() << ":" << port1 << endl;
-             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost3" << " at "<< ip2.str() << ":" << port2 << endl;
-             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost4" << " at "<< ip3.str() << ":" << port3 << endl;
+             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost1_1" << " at "<< ip1.str() << ":" << port1 << endl;
+             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost1_2" << " at "<< ip2.str() << ":" << port2 << endl;
+             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost1_3" << " at "<< ip3.str() << ":" << port3 << endl;
+
+             }
+             else if(getSimulation()->getModule(18) == bestHost){
+             auto info2 = check_and_cast<MecPlatformManager*>(getSimulation()->getModule(19)->getSubmodule("mecPlatformManager"))->instantiateMEApp(createAppMsg->dup());
+             auto info3 = check_and_cast<MecPlatformManager*>(getSimulation()->getModule(20)->getSubmodule("mecPlatformManager"))->instantiateMEApp(createAppMsg->dup());
+             auto info4 = check_and_cast<MecPlatformManager*>(getSimulation()->getModule(21)->getSubmodule("mecPlatformManager"))->instantiateMEApp(createAppMsg->dup());
+             ip1 = info2.endPoint.addr;
+             port1 = info2.endPoint.port;
+             ip2 = info3.endPoint.addr;
+             port2 = info3.endPoint.port;
+             ip3 = info4.endPoint.addr;
+             port3 = info4.endPoint.port;
+             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost2_1" << " at "<< ip1.str() << ":" << port1 << endl;
+             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost2_2" << " at "<< ip2.str() << ":" << port2 << endl;
+             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost2_3" << " at "<< ip3.str() << ":" << port3 << endl;
+
+             }
+             else{
+             auto info2 = check_and_cast<MecPlatformManager*>(getSimulation()->getModule(22)->getSubmodule("mecPlatformManager"))->instantiateMEApp(createAppMsg->dup());
+             auto info3 = check_and_cast<MecPlatformManager*>(getSimulation()->getModule(23)->getSubmodule("mecPlatformManager"))->instantiateMEApp(createAppMsg->dup());
+             auto info4 = check_and_cast<MecPlatformManager*>(getSimulation()->getModule(24)->getSubmodule("mecPlatformManager"))->instantiateMEApp(createAppMsg->dup());
+             ip1 = info2.endPoint.addr;
+             port1 = info2.endPoint.port;
+             ip2 = info3.endPoint.addr;
+             port2 = info3.endPoint.port;
+             ip3 = info4.endPoint.addr;
+             port3 = info4.endPoint.port;
+             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost3_1" << " at "<< ip1.str() << ":" << port1 << endl;
+             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost3_2" << " at "<< ip2.str() << ":" << port2 << endl;
+             EV << "MecOrchestrator::startMECApp - new MEC application with name: " << " instantiated on MEC host []"<< "mecHost3_3" << " at "<< ip3.str() << ":" << port3 << endl;
 
              }
 

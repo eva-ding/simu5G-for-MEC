@@ -1,0 +1,17 @@
+{
+"appDid" : "WAMECAPP",
+"appName" : "MECWarningAlertApp",
+"appProvider" : "simu5g.apps.mec.WarningAlert.MECWarningAlertApp",
+"appInfoName" : "appInfoName_",
+"appDescription" : "appDescription_",
+"virtualComputeDescriptor" :{
+    "virtualDisk": 10,
+    "virtualCpu" : 1000,
+    "virtualMemory":10
+    },
+"appServiceRequired": [
+    
+],
+
+"omnetppServiceRequired": "MEWarningAlertService"
+}
