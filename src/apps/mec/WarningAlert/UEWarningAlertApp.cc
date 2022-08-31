@@ -363,7 +363,7 @@ void UEWarningAlertApp::handleMatrixResult(cMessage* msg)
     auto pkt = dynamicPtrCast<const BytesChunk>(packet->peekAtFront<BytesChunk>());
 
     EV << "UE app:receive the result!" << endl;
-    EV << "receive " << pkt->getByteArraySize() << " elements!"<<pkt->getByte(1);//type is char????
+    EV << "receive " << pkt->getByteArraySize() << " elements!"<<endl;//type is char????
     // for(int i = 0; i<pkt->getByteArraySize(); i++){
     //     if(i == 0)
     //     EV << "The result is " << (int)pkt->getByte(i) << " ";
@@ -397,7 +397,7 @@ void UEWarningAlertApp::sendMatrixToMECApp(){
     inet::Packet* pkt = new inet::Packet("Metrix");
     //auto matrix = inet::makeShared<Matrix>();
     auto matrix = inet::makeShared<BytesChunk>();
-    std::vector<uint8_t> data(40000,1);
+    std::vector<uint8_t> data(65520,1);
     matrix->setBytes(data);
     //matrix->setType("MatrixadataArrive");
     //matrix->setX(20);
@@ -407,8 +407,11 @@ void UEWarningAlertApp::sendMatrixToMECApp(){
     //auto nouse = inet::makeShared<Matrix>();
     //nouse->setChunkLength(inet::B(1024));
     //pkt->insertAtBack(nouse);
-    socket.sendTo(pkt, mecAppAddress_ , mecAppPort_);
-
+    int i = 1;
+    while(i < 23){
+        socket.sendTo(pkt->dup(), mecAppAddress_ , mecAppPort_);
+        i++;
+    }
     EV << "UE app:sending matrix to the MEC app!" << endl;
 
     //sendStartMEWarningAlertApp();

@@ -67,6 +67,8 @@ void MECWarningAlertApp::initialize(int stage)
 
     processedUERequest = new cMessage("processedUERequest");
 
+    pktNum = 0;
+
     //testing
     EV << "MECWarningAlertApp::initialize - Mec application "<< getClassName() << " with mecAppId["<< mecAppId << "] has started!" << endl;
 
@@ -83,20 +85,20 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
     {
         if(ueSocket.belongsToSocket(msg))
         {
-            if (getParentModule()->getName() == "mecHost1"){
-                //TODO
-            }
+            pktNum++;
+            if(pktNum == 22){
             auto pk = check_and_cast<Packet *>(msg);
             auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
-            int dim = sqrt(matrixPk->getByteArraySize());
-            double time = vim->calculateProcessingTime(mecAppId, 10*dim*dim*dim/1000000);//todo how to measure time
-            // time = time + (rand() % 1000 / (float)1000) /5 * time;
+            // int dim = sqrt(matrixPk->getByteArraySize());
+            double time = vim->calculateProcessingTime(mecAppId, 10*1200*1200/1000000);//todo how to measure time
+            time = time + (rand() % 1000 / (float)1000) /5 * time;
             EV<< "test time:" << time;
             pac = check_and_cast<Packet *>(msg)->dup();
             scheduleAt(simTime()+time,processedUERequest);
             //handleUeMessage(msg);
             delete msg;
             return;
+            }
         }
     }
 //    EV<<msg->getName()<<endl;
@@ -153,7 +155,7 @@ void MECWarningAlertApp::handleUeMessage(omnetpp::cMessage *msg)
         // }
 
         //int ans = x * y;
-        std::vector<uint8_t> ans(40000,20);
+        std::vector<uint8_t> ans(1200,2);
         auto info = inet::makeShared<BytesChunk>();
         info->setBytes(ans);
         // auto info = inet::makeShared<Result>();

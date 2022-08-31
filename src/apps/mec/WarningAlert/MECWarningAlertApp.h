@@ -72,6 +72,8 @@ class MECWarningAlertApp : public MecAppBase
     int x;
     int y;
 
+    int pktNum;
+
     //cMessage *message;
 
     protected:
