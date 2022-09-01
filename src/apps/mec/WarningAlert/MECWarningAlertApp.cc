@@ -71,6 +71,8 @@ void MECWarningAlertApp::initialize(int stage)
     hostSocket.bind(4002);
 
     processedHostRequest = new cMessage("processedHostRequest");
+    pktNum = 0;
+    subpktNum = 0;
 
     //testing
     EV << "MECWarningAlertApp::initialize - Mec application "<< getClassName() << " with mecAppId["<< mecAppId << "] has started!" << endl;
@@ -89,8 +91,12 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
         if(strcmp(msg->getName(), "Matrix") == 0)// if(ueSocket.belongsToSocket(msg))
         {
             //TODO cut packet and send to worker
+            pktNum++;
+            EV<<"receive no."<<pktNum<<" packet"<<endl;
+            if(pktNum == 12){
             numOfSubResult = 0;
             sendSubMatrix(msg);
+            }
             // if (getParentModule()->getName() == "mecHost1"){
             //     //TODO
             // }
@@ -108,11 +114,14 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
         {
             //TODO from host 
             if (strcmp(msg->getName(), "SubMatrix") == 0){
+            subpktNum++;
+            EV<<"receive no."<<subpktNum<<" packet"<<endl;
+            if(subpktNum == 6){
             auto pk = check_and_cast<Packet *>(msg);
             auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
             int numOfPara = matrixPk->getByteArraySize();
             //srand(time(NULL));
-            double time = vim->calculateProcessingTime(mecAppId, 10*200*200*100/1000000);//todo how to measure time
+            double time = vim->calculateProcessingTime(mecAppId, 10*300*1200/1000000);//todo how to measure time
             time = time + (rand() % 1000 / (float)1000) /5 * time;
             EV<< "test time:" << time;
             pac = check_and_cast<Packet *>(msg)->dup();
@@ -120,6 +129,7 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
             //handleUeMessage(msg);
             delete msg;
             return;
+            }
             }
             if (strcmp(msg->getName(), "SubResult") == 0){
                 if (collect(msg)) sendResultToUe();
@@ -176,20 +186,33 @@ void MECWarningAlertApp::sendSubMatrix(omnetpp::cMessage *msg){
     // nouse->setX(3);
     // packet3->insertAtBack(nouse);
     packet3->insertAtBack(submatrix2);
+
+    int i = 1;
+    while(i<7){
     if(!strcmp(getOwner()->getFullName(),"mecHost1")){
-    hostSocket.sendTo(packet1, L3AddressResolver().resolve("192.168.8.2"),4001);
-    hostSocket.sendTo(packet2, L3AddressResolver().resolve("192.168.9.2"),4001);
-    hostSocket.sendTo(packet3, L3AddressResolver().resolve("192.168.10.2"),4001);}
+    hostSocket.sendTo(packet1->dup(), L3AddressResolver().resolve("192.168.8.2"),4001);
+    hostSocket.sendTo(packet2->dup(), L3AddressResolver().resolve("192.168.9.2"),4001);
+    hostSocket.sendTo(packet3->dup(), L3AddressResolver().resolve("192.168.10.2"),4001);
+    EV<<"send no."<<i<<" sub packet to workers"<<endl;
+    i++;
+    }
     else if(!strcmp(getOwner()->getFullName(),"mecHost2")){
-    hostSocket.sendTo(packet1, L3AddressResolver().resolve("192.168.19.2"),4001);
-    hostSocket.sendTo(packet2, L3AddressResolver().resolve("192.168.20.2"),4001);
-    hostSocket.sendTo(packet3, L3AddressResolver().resolve("192.168.21.2"),4001);}
+    hostSocket.sendTo(packet1->dup(), L3AddressResolver().resolve("192.168.19.2"),4001);
+    hostSocket.sendTo(packet2->dup(), L3AddressResolver().resolve("192.168.20.2"),4001);
+    hostSocket.sendTo(packet3->dup(), L3AddressResolver().resolve("192.168.21.2"),4001);
+    EV<<"send no."<<i<<" sub packet to workers"<<endl;
+    i++;
+    }
     else {
-    hostSocket.sendTo(packet1, L3AddressResolver().resolve("192.168.30.1"),4001);
-    hostSocket.sendTo(packet2, L3AddressResolver().resolve("192.168.33.1"),4001);
-    hostSocket.sendTo(packet3, L3AddressResolver().resolve("192.168.36.1"),4001);}
+    hostSocket.sendTo(packet1->dup(), L3AddressResolver().resolve("192.168.30.1"),4001);
+    hostSocket.sendTo(packet2->dup(), L3AddressResolver().resolve("192.168.33.1"),4001);
+    hostSocket.sendTo(packet3->dup(), L3AddressResolver().resolve("192.168.36.1"),4001);
+    EV<<"send no."<<i<<" sub packet to workers"<<endl;
+    i++;
+    }
 
     EV << "UEWarningAlertApp::sendSubMatrix() - sent submatrix to the worker MEC app" << endl;
+    }
 }
 
 bool MECWarningAlertApp::collect(omnetpp::cMessage *msg){
