@@ -397,7 +397,13 @@ void UEWarningAlertApp::sendMatrixToMECApp(){
     inet::Packet* pkt = new inet::Packet("Metrix");
     //auto matrix = inet::makeShared<Matrix>();
     auto matrix = inet::makeShared<BytesChunk>();
-    std::vector<uint8_t> data(65520,1);
+    std::vector<uint8_t> data(60000,1);
+    // int test[100] = {10};
+    // int *p = test;
+    // uint8_t *q = (uint8_t *)p;
+    // for(int i = 0; i <399; i++){
+    //     EV << std::hex << (int)*(q+i) <<" ";
+    // }
     matrix->setBytes(data);
     //matrix->setType("MatrixadataArrive");
     //matrix->setX(20);
@@ -408,8 +414,9 @@ void UEWarningAlertApp::sendMatrixToMECApp(){
     //nouse->setChunkLength(inet::B(1024));
     //pkt->insertAtBack(nouse);
     int i = 1;
-    while(i < 23){
+    while(i < 25){
         socket.sendTo(pkt->dup(), mecAppAddress_ , mecAppPort_);
+        EV << "send no."<< i<<"packet"<<endl;
         i++;
     }
     EV << "UE app:sending matrix to the MEC app!" << endl;

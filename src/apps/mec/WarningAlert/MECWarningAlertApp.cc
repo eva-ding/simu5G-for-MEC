@@ -86,7 +86,8 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
         if(ueSocket.belongsToSocket(msg))
         {
             pktNum++;
-            if(pktNum == 22){
+            EV << "receive no."<<pktNum<<"packet"<<endl;
+            if(pktNum == 24){
             auto pk = check_and_cast<Packet *>(msg);
             auto matrixPk = dynamicPtrCast<const BytesChunk>(pk->peekAtFront<BytesChunk>());
             // int dim = sqrt(matrixPk->getByteArraySize());
