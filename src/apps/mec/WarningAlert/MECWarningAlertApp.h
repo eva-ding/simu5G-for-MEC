@@ -79,6 +79,7 @@ class MECWarningAlertApp : public MecAppBase
     int y;
 
     int numOfSubResult;
+    int pktNum;
 
     std::vector<uint8_t> result;
 
