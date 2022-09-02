@@ -244,7 +244,7 @@ void MECWarningAlertApp::handleMasterMessage(omnetpp::cMessage *msg){
 
     auto info = inet::makeShared<BytesChunk>();
     // if(seq->getX() == 1 || seq->getX() == 2) 
-    info->setBytes(std::vector<uint8_t>(1200,120));
+    info->setBytes(std::vector<uint8_t>(600,120));
     // else info->setBytes(std::vector<uint8_t>(20000,200));
     // auto nouse = inet::makeShared<Result>();
     // nouse->setRes(seq->getX());
