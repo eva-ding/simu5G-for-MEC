@@ -122,7 +122,7 @@ void MECWarningAlertApp::handleMessage(cMessage *msg)
             int numOfPara = matrixPk->getByteArraySize();
             //srand(time(NULL));
             double time = vim->calculateProcessingTime(mecAppId, 10*300*1200/1000000);//todo how to measure time
-            time = time + (rand() % 1000 / (float)1000) /5 * time;
+            time = time + (rand() % 1000 / (float)1000) * time;
             EV<< "test time:" << time;
             pac = check_and_cast<Packet *>(msg)->dup();
             scheduleAt(simTime()+time,processedHostRequest);
@@ -163,9 +163,9 @@ void MECWarningAlertApp::sendSubMatrix(omnetpp::cMessage *msg){
     ueAppPort = pk->getTag<L4PortInd>()->getSrcPort();
 
     auto submatrix1 = inet::makeShared<BytesChunk>();
-    submatrix1->setBytes(std::vector<uint8_t>(20000,1));
+    submatrix1->setBytes(std::vector<uint8_t>(60000,1));
     auto submatrix2 = inet::makeShared<BytesChunk>();
-    submatrix2->setBytes(std::vector<uint8_t>(20000,2));
+    submatrix2->setBytes(std::vector<uint8_t>(60000,2));
     //matrix->setType("MatrixadataArrive");
     //matrix->setX(20);
     //matrix->setY(2000);
@@ -240,7 +240,7 @@ void MECWarningAlertApp::sendResultToUe(){
     EV << "MECWarningAlertApp::sendResultToUe - send total result" << endl;
 
     auto info = inet::makeShared<BytesChunk>();
-    result = std::vector<uint8_t>(40000,200);
+    result = std::vector<uint8_t>(600,120);
     info->setBytes(result);
     info->addTagIfAbsent<inet::CreationTimeTag>()->setCreationTime(simTime());
 
@@ -269,7 +269,7 @@ void MECWarningAlertApp::handleMasterMessage(omnetpp::cMessage *msg){
 
     auto info = inet::makeShared<BytesChunk>();
     // if(seq->getX() == 1 || seq->getX() == 2) 
-    info->setBytes(std::vector<uint8_t>(20000,200));
+    info->setBytes(std::vector<uint8_t>(300,120));
     // else info->setBytes(std::vector<uint8_t>(20000,200));
     // auto nouse = inet::makeShared<Result>();
     // nouse->setRes(seq->getX());
